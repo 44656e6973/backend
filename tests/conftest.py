@@ -14,21 +14,19 @@ def user():
 @pytest.fixture
 def auth_client(api_client, user):
     # 1. Логинимся
-    login_url = reverse("token_obtain_pair")  # имя URL из вашего urls.py
+    login_url = reverse("token_obtain_pair")
     response = api_client.post(login_url, {
         "username": user.username,
-        "password": "testpassafsd123"  # пароль из UserFactory
+        "password": "testpassafsd123"  
     }, format="json")
     
     assert response.status_code == 200, f"Не удалось залогиниться: {response.data}"
     
     access_token = response.data["access"]
     refresh_token = response.data["refresh"]
-    
-    # 2. Прописываем токен в заголовки
+
     api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
     
-    # 3. Сохраняем токены на клиенте для удобства
     api_client.access_token = access_token
     api_client.refresh_token = refresh_token
     

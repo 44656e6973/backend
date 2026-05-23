@@ -5,7 +5,7 @@ from core.factories import UserFactory, IdeaFactory, TagFactory
 
 @pytest.mark.django_db
 def test_create_idea(auth_client, user):
-    url = reverse("idea-list")  # Замените на имя вашего URL
+    url = reverse("idea-list")
     
     tags = TagFactory.create_batch(2)
     data = {
