@@ -1,23 +1,25 @@
 import factory
-from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import make_password
 from ideaboard.models import Idea, Comments, Likes, Tag, User
 
-User = get_user_model()
 
 class UserFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = User
-
     username = factory.Faker('user_name')
     email = factory.LazyAttribute(lambda obj: f'{obj.username}@example.com')
-    password = factory.PostGenerationMethodCall('set_password', 'testpassafsd123')
+    password = factory.LazyFunction(lambda: make_password('testpassafsd123'))
     avatar_URL = factory.Faker('image_url')
     created_at = factory.Faker('date_time_this_decade')
+
+class TagFactory(factory.django.DjangoModelFactory):  
+    class Meta:
+        model = Tag
+    name = factory.Faker('word')
 
 class IdeaFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Idea
-
     title = factory.Faker('sentence')
     description = factory.Faker('paragraph')
     status = factory.Iterator(['open', 'in_progress', 'closed'])
@@ -25,4 +27,10 @@ class IdeaFactory(factory.django.DjangoModelFactory):
     updated_at = factory.Faker('date_time_this_decade')
     cover_imgage_URL = factory.Faker('image_url')
     author = factory.SubFactory(UserFactory)
-    tags = factory.RelatedFactoryList('ideaboard.api.v1.factories.TagFactory', factory_related_name='idea', size=3)
+    
+  
+    @factory.post_generation
+    def tags(self, create, extracted, **kwargs):
+        if not create or not extracted:
+            return
+        self.tags.set(extracted)
