@@ -13,7 +13,6 @@ def user():
 
 @pytest.fixture
 def auth_client(api_client, user):
-    # 1. Логинимся
     login_url = reverse("token_obtain_pair")
     response = api_client.post(login_url, {
         "username": user.username,

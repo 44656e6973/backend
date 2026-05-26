@@ -31,6 +31,9 @@ class IdeaFactory(factory.django.DjangoModelFactory):
   
     @factory.post_generation
     def tags(self, create, extracted, **kwargs):
-        if not create or not extracted:
+        if not create:
             return
-        self.tags.set(extracted)
+        if extracted:
+            self.tags.set(extracted)
+        else:
+            self.tags.set(TagFactory.create_batch(2))

@@ -1,4 +1,3 @@
-# tests/test_tags.py
 import pytest
 from django.urls import reverse
 from ideaboard.models import Tag
@@ -11,7 +10,7 @@ def test_list_tags_unauthorized(api_client):
     url = reverse("tag-list")
     
     response = api_client.get(url)
-    assert response.status_code == 401  # Unauthorized
+    assert response.status_code == 401  
 
 @pytest.mark.django_db
 def test_list_tags_authorized(auth_client):
@@ -22,7 +21,7 @@ def test_list_tags_authorized(auth_client):
     response = auth_client.get(url)
     assert response.status_code == 200
     assert len(response.data) == 3
-    assert response.data[0]["name"]  # Проверяем структуру
+    assert response.data[0]["name"] 
 
 @pytest.mark.django_db
 def test_tag_creation_blocked(auth_client):
@@ -30,7 +29,7 @@ def test_tag_creation_blocked(auth_client):
     url = reverse("tag-list")
     response = auth_client.post(url, {"name": "blocked"}, format="json")
     
-    assert response.status_code == 405  # Method Not Allowed
+    assert response.status_code == 405 
 
 @pytest.mark.django_db
 def test_tag_deletion_blocked(auth_client):
