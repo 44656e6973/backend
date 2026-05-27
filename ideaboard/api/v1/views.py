@@ -9,7 +9,7 @@ from .serializers import IdeaSerializer, Registration, UserSerializer, TagSerial
 
 
 class IdeaViewSet(viewsets.ModelViewSet):
-    queryset = Idea.objects.select_related("author").prefetch_related("tags").all
+    queryset = Idea.objects.select_related("author").prefetch_related("tags").all()
     serializer_class = IdeaSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 

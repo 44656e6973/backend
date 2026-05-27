@@ -25,7 +25,7 @@ class IdeaFactory(factory.django.DjangoModelFactory):
     status = factory.Iterator(['open', 'in_progress', 'closed'])
     created_at = factory.Faker('date_time_this_decade')
     updated_at = factory.Faker('date_time_this_decade')
-    cover_imgage_URL = factory.Faker('image_url')
+    cover_image_URL = factory.Faker('image_url')
     author = factory.SubFactory(UserFactory)
     
   

@@ -5,12 +5,15 @@ from core.factories import TagFactory
 
 @pytest.mark.django_db
 def test_list_tags_unauthorized(api_client):
-    """Неавторизованный пользователь не видит теги"""
+    """Публичный просмотр тегов разрешён"""
     TagFactory.create_batch(3)
     url = reverse("tag-list")
     
     response = api_client.get(url)
-    assert response.status_code == 401  
+    
+    assert response.status_code == 200
+    assert len(response.data) == 3
+    assert response.data[0]["name"] 
 
 @pytest.mark.django_db
 def test_list_tags_authorized(auth_client):

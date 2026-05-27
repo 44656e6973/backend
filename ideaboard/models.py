@@ -23,7 +23,7 @@ class Idea(models.Model):
     status = models.CharField(max_length=20, default='draft')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    cover_imgage_URL = models.URLField(blank=True, null=True)
+    cover_image_URL = models.URLField(blank=True, null=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ideas')
     tags = models.ManyToManyField(Tag, related_name='ideas', blank=True)
 
