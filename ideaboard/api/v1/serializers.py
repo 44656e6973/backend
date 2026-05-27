@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.hashers import make_password
 from ideaboard.models import User, Idea, Comments, Likes, Tag
+from ideaboard.counters import get_current_idea_counts
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -38,11 +39,24 @@ class TagSerializer(serializers.ModelSerializer):
 class IdeaSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
+    likes_count = serializers.SerializerMethodField()
+    comments_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Idea
-        fields = ['id', 'title', 'description', 'status', 'created_at', 'updated_at', 'cover_image_URL', 'author', 'tags']
-        read_only_fields = ['author', 'created_at', 'updated_at', 'id']  
+        fields = ['id', 'title', 'description', 'status', 'created_at', 'updated_at', 'cover_image_URL', 'likes_count', 'comments_count', 'author', 'tags']
+        read_only_fields = ['author', 'created_at', 'updated_at', 'id', 'likes_count', 'comments_count']  
+
+    def _get_counts(self, obj):
+        if not hasattr(obj, '_current_idea_counts'):
+            obj._current_idea_counts = get_current_idea_counts(obj)
+        return obj._current_idea_counts
+
+    def get_likes_count(self, obj):
+        return self._get_counts(obj)['likes_count']
+
+    def get_comments_count(self, obj):
+        return self._get_counts(obj)['comments_count']
 
     def validate_title(self, value):
         if not value.strip():

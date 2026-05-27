@@ -1,8 +1,42 @@
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+
+# Environments and secrets
 .env
-.venv
+.env.*
+!.env.example
+.venv/
 venv/
+env/
+
+# Django local files
 db.sqlite3
-backend.egg-info/
+*.sqlite3
+media/
+staticfiles/
+
+# Celery
+celerybeat-schedule
+celerybeat-schedule.*
+
+# Tests and coverage
 .pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Logs
+*.log
+
+# IDE and OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

@@ -2,7 +2,9 @@ from rest_framework import viewsets, permissions, generics, mixins, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.db import transaction
 from ideaboard.models import Idea, Tag, Comments, Likes, User
+from ideaboard.counters import increment_idea_counter
 from .serializers import IdeaSerializer, Registration, UserSerializer, TagSerializer, CommentSerializer, LikeSerializer
 
 
@@ -44,18 +46,25 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
-
     def get_queryset(self):
         return Comments.objects.filter(
             idea_id=self.kwargs['idea_pk']
         ).select_related('author').order_by('-created_at')
 
     def perform_create(self, serializer):
-        serializer.save(
+        comment = serializer.save(
             author=self.request.user,
             idea_id=self.kwargs['idea_pk']
+        )
+        transaction.on_commit(
+            lambda: increment_idea_counter(comment.idea_id, comments_delta=1)
+        )
+
+    def perform_destroy(self, instance):
+        idea_id = instance.idea_id
+        instance.delete()
+        transaction.on_commit(
+            lambda: increment_idea_counter(idea_id, comments_delta=-1)
         )
 
 class LikeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
@@ -68,6 +77,12 @@ class LikeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.Ge
     def create(self, request, *args, **kwargs):
         idea_pk = self.kwargs.get("idea_pk")
         like, created = Likes.objects.get_or_create(user=request.user, idea_id=idea_pk)
+        if created:
+            transaction.on_commit(
+                lambda: increment_idea_counter(idea_pk, likes_delta=1)
+            )
+            return Response({"status": "liked", "like_id": like.id}, status=status.HTTP_201_CREATED)
+        return Response({"status": "already_liked", "like_id": like.id}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'], url_path='toggle-like', url_name='like-toggle', permission_classes=[permissions.IsAuthenticated])
     def toggle_like(self, request, *args, **kwargs):
@@ -81,7 +96,13 @@ class LikeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.Ge
         
         if not created:
             like.delete()
+            transaction.on_commit(
+                lambda: increment_idea_counter(idea_pk, likes_delta=-1)
+            )
             return Response({"status": "unliked"}, status=status.HTTP_200_OK)
+        transaction.on_commit(
+            lambda: increment_idea_counter(idea_pk, likes_delta=1)
+        )
         return Response({"status": "liked", "like_id": like.id}, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, *args, **kwargs):
@@ -91,6 +112,10 @@ class LikeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.Ge
         try:
             like = Likes.objects.get(user=request.user, idea_id=self.kwargs['idea_pk'])
             like.delete()
+            idea_pk = self.kwargs['idea_pk']
+            transaction.on_commit(
+                lambda: increment_idea_counter(idea_pk, likes_delta=-1)
+            )
             return Response({"status": "unliked"}, status=status.HTTP_200_OK)
         except Likes.DoesNotExist:
             return Response({"detail": "Like not found"}, status=status.HTTP_404_NOT_FOUND)

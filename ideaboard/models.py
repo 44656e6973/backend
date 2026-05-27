@@ -24,6 +24,8 @@ class Idea(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     cover_image_URL = models.URLField(blank=True, null=True)
+    likes_count = models.PositiveIntegerField(default=0)
+    comments_count = models.PositiveIntegerField(default=0)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ideas')
     tags = models.ManyToManyField(Tag, related_name='ideas', blank=True)
 
