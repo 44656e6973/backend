@@ -5,7 +5,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import transaction
 from ideaboard.models import Idea, Tag, Comments, Likes, User
 from ideaboard.counters import increment_idea_counter
-from .serializers import IdeaSerializer, Registration, UserSerializer, TagSerializer, CommentSerializer, LikeSerializer
+from .serializers import IdeaSerializer, Registration, UserSerializer, TagSerializer, CommentSerializer, LikeSerializer, LoginSerializer
 
 
 
@@ -32,6 +32,23 @@ class RegistrationView(generics.CreateAPIView):
             'refresh': str(refresh),
             'access': str(refresh.access_token),
         })
+    
+class LoginView(generics.GenericAPIView):
+    serializer_class = LoginSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = serializer.validated_data['user']
+        
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'user': UserSerializer(user, context=self.get_serializer_context()).data,
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }, status=status.HTTP_200_OK)
     
 class TagView(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()  

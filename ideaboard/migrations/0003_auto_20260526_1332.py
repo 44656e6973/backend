@@ -9,7 +9,10 @@ def add_default_tags(apps, schema_editor):
              'data science', 'devops', 'game development', 'blockchain', 'cybersecurity', 'cloud computing',
              'artificial intelligence', 'virtual reality', 'augmented reality', 'internet of things', 'big data', 'analytics', 'automation', 'robotics', 'natural language processing', 'computer vision', 'deep learning', 'neural networks',
              'quantum computing',]
-    Tag.objects.bulk_create([Tag(name=t) for t in tags])
+    Tag.objects.bulk_create(
+        [Tag(name=t.lower().strip()) for t in tags],
+        ignore_conflicts=True
+    )
 
 class Migration(migrations.Migration):
 
@@ -18,4 +21,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(add_default_tags, reverse_code=migrations.RunPython.noop),
     ]

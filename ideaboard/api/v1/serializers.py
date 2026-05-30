@@ -3,7 +3,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.hashers import make_password
 from ideaboard.models import User, Idea, Comments, Likes, Tag
 from ideaboard.counters import get_current_idea_counts
-
+from django.contrib.auth import authenticate
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -169,3 +169,28 @@ class Registration(serializers.ModelSerializer):
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError("Email already exists.")
         return value
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.CharField(required=True, write_only=True)
+    password = serializers.CharField(
+        required=True,
+        write_only=True,
+        style={'input_type': 'password'}
+    )
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        password = attrs.get('password')
+        
+        from ideaboard.models import User
+        try:
+            user = User.objects.get(email__iexact=email)
+            user = authenticate(username=user.username, password=password)
+        except User.DoesNotExist:
+            user = None
+        
+        if user is None:
+            raise serializers.ValidationError("Неверный логин или пароль.")
+        
+        attrs['user'] = user
+        return attrs
