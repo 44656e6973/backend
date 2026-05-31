@@ -21,7 +21,8 @@ dependencies = [
     "redis>=5.0,<6.0",
     "psycopg2-binary>=2.9,<3.0", 
     "factory-boy>=3.3,<4.0",    
-    "Faker>=25.0,<26.0",         
+    "Faker>=25.0,<26.0",       
+    "django-cors-headers>=4.3,<5.0",  
 ]
 
 [tool.pytest.ini_options]

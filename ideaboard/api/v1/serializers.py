@@ -135,19 +135,11 @@ class Registration(serializers.ModelSerializer):
         validators=[validate_password],
         style={'input_type': 'password'}
     )
-    password_confirm = serializers.CharField(
-        write_only=True,
-        required=True,
-        style={'input_type': 'password'}
-    )
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'password_confirm']
-
+        fields = ['username', 'email', 'password']
     def validate(self, attrs):
-        if attrs['password'] != attrs['password_confirm']:
-            raise serializers.ValidationError({"password_confirm": "Пароли не совпадают"})
         return attrs
 
     def create(self, validated_data):
@@ -173,9 +165,9 @@ class Registration(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     email = serializers.CharField(required=True, write_only=True)
     password = serializers.CharField(
-        required=True,
-        write_only=True,
-        style={'input_type': 'password'}
+    required=True,
+    write_only=True,
+    style={'input_type': 'password'}
     )
 
     def validate(self, attrs):
