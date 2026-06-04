@@ -4,7 +4,6 @@ from .views import (
     CommentViewSet,
     IdeaViewSet,
     LikeViewSet,
-    LoginView,
     LogoutView,
     RegistrationView,
     TagView,

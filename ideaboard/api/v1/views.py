@@ -12,7 +12,6 @@ from .serializers import (
     CommentSerializer,
     IdeaSerializer,
     LikeSerializer,
-    LoginSerializer,
     Registration,
     TagSerializer,
     UserSerializer,
