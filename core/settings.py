@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'ideaboard',
     'rest_framework',
-    
+    'rest_framework_simplejwt.token_blacklist',
 
 ]
 

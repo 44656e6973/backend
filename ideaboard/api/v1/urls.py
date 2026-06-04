@@ -1,6 +1,15 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import IdeaViewSet, RegistrationView, TagView, CommentViewSet, LikeViewSet, UserViewSet, LoginView
+from .views import (
+    CommentViewSet,
+    IdeaViewSet,
+    LikeViewSet,
+    LoginView,
+    LogoutView,
+    RegistrationView,
+    TagView,
+    UserViewSet,
+)
 
 router = DefaultRouter()
 router.register(r'ideas', IdeaViewSet, basename='idea')
@@ -11,6 +20,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('auth/register/', RegistrationView.as_view(), name='register'),
     path('auth/login/', LoginView.as_view(), name='login'),
+    path('auth/logout/', LogoutView.as_view(), name='logout'),
     path('users/me/', UserViewSet.as_view(), name='user-me'),   
     path(
         'ideas/<int:idea_pk>/comments/',

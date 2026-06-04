@@ -1,11 +1,22 @@
 from rest_framework import viewsets, permissions, generics, mixins, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 from django.db import transaction
 from ideaboard.models import Idea, Tag, Comments, Likes, User
 from ideaboard.counters import increment_idea_counter
-from .serializers import IdeaSerializer, Registration, UserSerializer, TagSerializer, CommentSerializer, LikeSerializer, LoginSerializer
+from .serializers import (
+    ActiveTokenRefreshSerializer,
+    CommentSerializer,
+    IdeaSerializer,
+    LikeSerializer,
+    LoginSerializer,
+    Registration,
+    TagSerializer,
+    UserSerializer,
+)
 
 
 
@@ -48,6 +59,21 @@ class LoginView(generics.GenericAPIView):
             'user': UserSerializer(user, context=self.get_serializer_context()).data,
             'refresh': str(refresh),
             'access': str(refresh.access_token),
+        }, status=status.HTTP_200_OK)
+
+class ActiveTokenRefreshView(TokenRefreshView):
+    serializer_class = ActiveTokenRefreshSerializer
+
+class LogoutView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        tokens = OutstandingToken.objects.filter(user=request.user)
+        deleted_tokens = tokens.count()
+        tokens.delete()
+        return Response({
+            'detail': 'Successfully logged out.',
+            'deleted_tokens': deleted_tokens,
         }, status=status.HTTP_200_OK)
     
 class TagView(viewsets.ReadOnlyModelViewSet):

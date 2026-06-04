@@ -4,6 +4,9 @@ from django.contrib.auth.hashers import make_password
 from ideaboard.models import User, Idea, Comments, Likes, Tag
 from ideaboard.counters import get_current_idea_counts
 from django.contrib.auth import authenticate
+from rest_framework_simplejwt.serializers import TokenRefreshSerializer
+from rest_framework_simplejwt.settings import api_settings
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -186,3 +189,14 @@ class LoginSerializer(serializers.Serializer):
         
         attrs['user'] = user
         return attrs
+
+
+class ActiveTokenRefreshSerializer(TokenRefreshSerializer):
+    def validate(self, attrs):
+        refresh = self.token_class(attrs["refresh"])
+        jti = refresh.payload[api_settings.JTI_CLAIM]
+
+        if not OutstandingToken.objects.filter(jti=jti).exists():
+            raise serializers.ValidationError("Refresh token is not active.")
+
+        return super().validate(attrs)
