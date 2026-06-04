@@ -19,7 +19,6 @@ router.register(r'tags', TagView, basename='tag' )
 urlpatterns = [
     path('', include(router.urls)),
     path('auth/register/', RegistrationView.as_view(), name='register'),
-    path('auth/login/', LoginView.as_view(), name='login'),
     path('auth/logout/', LogoutView.as_view(), name='logout'),
     path('users/me/', UserViewSet.as_view(), name='user-me'),   
     path(
