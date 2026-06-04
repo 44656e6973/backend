@@ -21,7 +21,9 @@ from ideaboard.api.v1.views import ActiveTokenRefreshView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/token', TokenObtainPairView.as_view()),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh', ActiveTokenRefreshView.as_view()),
     path('api/token/refresh/', ActiveTokenRefreshView.as_view(), name='token_refresh'),
     path('api/v1/', include('ideaboard.api.v1.urls')),
 ]

@@ -8,6 +8,7 @@ from .views import (
     RegistrationView,
     TagView,
     UserViewSet,
+    LoginView,
 )
 
 router = DefaultRouter()
@@ -19,6 +20,8 @@ urlpatterns = [
     path('', include(router.urls)),
     path('auth/register/', RegistrationView.as_view(), name='register'),
     path('auth/logout/', LogoutView.as_view(), name='logout'),
+    path('auth/login', LoginView.as_view()),
+    path('auth/login/', LoginView.as_view(), name='login'),
     path('users/me/', UserViewSet.as_view(), name='user-me'),   
     path(
         'ideas/<int:idea_pk>/comments/',

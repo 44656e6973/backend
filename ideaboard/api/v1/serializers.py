@@ -185,3 +185,28 @@ class ActiveTokenRefreshSerializer(TokenRefreshSerializer):
             raise serializers.ValidationError("Refresh token is not active.")
 
         return super().validate(attrs)
+    
+class LoginSerializer(serializers.Serializer):
+    email = serializers.CharField(required=True, write_only=True)
+    password = serializers.CharField(
+    required=True,
+    write_only=True,
+    style={'input_type': 'password'}
+    )
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        password = attrs.get('password')
+        
+        from ideaboard.models import User
+        try:
+            user = User.objects.get(email__iexact=email)
+            user = authenticate(username=user.username, password=password)
+        except User.DoesNotExist:
+            user = None
+        
+        if user is None:
+            raise serializers.ValidationError("Неверный логин или пароль.")
+        
+        attrs['user'] = user
+        return attrs
