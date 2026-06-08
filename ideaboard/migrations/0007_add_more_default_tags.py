@@ -74,7 +74,7 @@ DEFAULT_TAGS = [
 ]
 
 
-def ensure_default_tags(apps, schema_editor):
+def add_default_tags(apps, schema_editor):
     Tag = apps.get_model('ideaboard', 'Tag')
     Tag.objects.bulk_create(
         [Tag(name=tag.lower().strip()) for tag in DEFAULT_TAGS],
@@ -85,9 +85,9 @@ def ensure_default_tags(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ideaboard', '0005_idea_counters'),
+        ('ideaboard', '0006_remove_default_tags'),
     ]
 
     operations = [
-        migrations.RunPython(ensure_default_tags, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(add_default_tags, reverse_code=migrations.RunPython.noop),
     ]
